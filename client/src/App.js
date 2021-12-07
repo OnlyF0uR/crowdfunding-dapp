@@ -1,6 +1,6 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import SimpleStorageContract from './contracts/SimpleStorage.json';
-import { getWeb3 } from './getWeb3';
+import { getWeb3 } from './web3';
 import { Routes, Route } from 'react-router-dom';
 
 import './App.css'
@@ -57,62 +57,54 @@ const campaigns = {
     "launchpad": []
 }
 
-class App extends Component {
-    state = { web3: null, contract: null };
+function App() {
+    const [web3, setWeb3] = useState({ web3: null, contract: null});
 
-    componentDidMount = async () => {
-        try {
-            // Get network provider and web3 instance.
-            const web3 = await getWeb3();
+    useEffect(() => {
+        async function registerWeb3() {
+            try {
+                // Get network provider and web3 instance.
+                const web3 = await getWeb3();
 
-            // Get the contract instance.
-            const networkId = await web3.eth.net.getId();
-            const deployedNetwork = SimpleStorageContract.networks[networkId];
-            const instance = new web3.eth.Contract(
-                SimpleStorageContract.abi,
-                deployedNetwork && deployedNetwork.address,
-            );
+                // Get the contract instance.
+                const networkId = await web3.eth.net.getId();
+                const deployedNetwork = SimpleStorageContract.networks[networkId];
+                const instance = new web3.eth.Contract(
+                    SimpleStorageContract.abi,
+                    deployedNetwork && deployedNetwork.address,
+                );
 
-            // Set web3, accounts, and contract to the state, and then proceed with an
-            // example of interacting with the contract's methods.
-            this.setState({ web3: web3, contract: instance });
-        } catch (error) {
-            // Catch any errors for any of the above operations.
-            alert(`Failed to load web3, accounts, or contract. Check console for details.`);
-            console.error(error);
+                // Set web3, accounts, and contract to the state, and then proceed with an
+                // example of interacting with the contract's methods.
+                setWeb3({ web3: web3, contract: instance});
+            } catch (error) {
+                // Catch any errors for any of the above operations.
+                alert(`Failed to load web3, accounts, or contract. Check console for details.`);
+                console.error(error);
+            }
         }
-    };
+        registerWeb3();
+    }, [])
 
-    render() {
-        let homeComponents = <div className="App">
-            <Home />
-            <Footer />
-        </div>
-
-        if (this.state.web3 !== null) {
-            homeComponents = <div className="App">
+    return (
+        <Routes>
+            {/* Error route */}
+            <Route path='*' element={<p>page not found</p>} />
+            {/* Home route */}
+            <Route path="/" element={<div className="App">
                 <Home />
-                <Campaigns campaigns={campaigns} />
+                { web3 != null ? <Campaigns campaigns={campaigns} /> : "" }
                 <Footer />
-            </div>
-        }
+            </div>} />
 
-        return (
-            <Routes>
-                {/* Error route */}
-                <Route path='*' element={<p>page not found</p>} />
-                {/* Home route */}
-                <Route path="/" element={homeComponents}/>
-
-                {/* Explore routes */}
-                <Route path="/explore" element={<Explore />}/>
-                <Route path="/news" element={<News />}/>
-                <Route path="/fund/create" element={<FundCreate />}/>
-                <Route path="/fund/list" element={<FundList />}/>
-                <Route path="/fund/docs" element={<FundDocs />}/>
-            </Routes>
-        )
-    }
-}
+            {/* Explore routes */}
+            <Route path="/explore" element={<Explore />} />
+            <Route path="/news" element={<News />} />
+            <Route path="/fund/create" element={<FundCreate />} />
+            <Route path="/fund/list" element={<FundList />} />
+            <Route path="/fund/docs" element={<FundDocs />} />
+        </Routes>
+    )
+};
 
 export default App;
