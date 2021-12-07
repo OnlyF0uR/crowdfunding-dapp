@@ -1,6 +1,7 @@
 import React from 'react';
 import Navbar from 'react-bootstrap/Navbar';
 import Container from 'react-bootstrap/Container';
+import { Link } from 'react-router-dom';
 
 export default class HomeComponent extends React.Component {
     render() {
@@ -12,8 +13,8 @@ export default class HomeComponent extends React.Component {
                     <Container>
                         <Navbar.Text>Copyright © <strong>ProjectName</strong></Navbar.Text>
                         <ul className="Footer-links">
-                            <li><Navbar.Text>Privacy Policy</Navbar.Text></li>
-                            <li><Navbar.Text>Terms of Service</Navbar.Text></li>
+                            <li><Link to="/privacy.pdf" className="navbar-text" style={{ textDecoration: 'none' }}>Privacy Policy</Link></li>
+                            <li><Link to="/tos.pdf" className="navbar-text" style={{ textDecoration: 'none' }}>Terms of Service</Link></li>
                         </ul>
                     </Container>
                 </Navbar>

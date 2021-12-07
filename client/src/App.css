@@ -3,6 +3,10 @@
     color: #fff;
 }
 
+hr {
+    background-color: #6163ff;
+}
+
 ul {
     list-style-type: none;
 }
