@@ -1,20 +1,8 @@
 .App {
     text-align: center;
+    color: #fff;
 }
 
-.App-campaigns {
-    margin: 1%;
-}
-
-.Card-title {
-    font-size: 1.3rem;
-}
-
-.Card-adr {
-    font-size: 1rem;
-    font-style: italic;
-}
-
-.Card-desc {
-    font-size: 1.1rem;
+ul {
+    list-style-type: none;
 }

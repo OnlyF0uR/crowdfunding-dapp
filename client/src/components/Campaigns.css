@@ -1,0 +1,58 @@
+/* Nav part */
+.Nav-item {
+    color: rgba(255,255,255,.55);
+}
+
+.Nav-item.active {
+    color: #6163ff;
+}
+
+.Nav-item:hover {
+    color: #609df8;
+    text-decoration: underline;
+}
+
+/* Campaign part */
+.Campaigns {
+    margin-top: 10px;
+    margin-left: 5%;
+    margin-right: 5%;
+}
+
+/* Card part */
+.Card {
+    transition: transform .5s; /* Animation */
+    background-color: #25282c;
+    border-radius: 8px;
+}
+
+.Card:hover {
+    transform: scale(1.05)
+}
+
+.Card-title {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.Card-adr {
+    font-size: 12px;
+    font-style: italic;
+}
+
+.Card-desc {
+    font-size: 15px;
+}
+
+.Card-prog {
+    font-size: 12px;
+    line-height: 5px;
+}
+
+hr {
+    background-color: #6163ff;
+}
+
+.progress-bar {
+    background-color: #6163ff;
+}
