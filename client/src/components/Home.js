@@ -5,12 +5,10 @@ import { Link } from 'react-router-dom';
 import './Home.css';
 
 import { Card, Row, Col, Carousel, ProgressBar, Nav, Container } from 'react-bootstrap';
-import Navbar from './Navbar';
 
 function HomeContent() {
     return (
         <>
-            <Navbar />
             <Carousel>
                 <Carousel.Item>
                     <img

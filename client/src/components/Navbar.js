@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { connect } from '../web3';
 
 import Nav from 'react-bootstrap/Nav';
 import { Link } from 'react-router-dom';
@@ -8,7 +7,7 @@ import Container from 'react-bootstrap/Container';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import Button from 'react-bootstrap/Button';
 
-function NavigationBar() {
+function NavigationBar({ provider }) {
     const [account, setAccount] = useState(null);
 
     return (
@@ -39,8 +38,13 @@ function NavigationBar() {
                             {account === null ?
                                 <Button variant="primary" style={{ backgroundColor: '#6163ff' }} onClick={
                                     async () => {
-                                        if (window.ethereum && window.ethereum.isConnected()) {
-                                            setAccount(await connect(account));
+                                        if (provider !== null) {
+                                            await provider.send("eth_requestAccounts", []);
+                                            
+                                            const signer = provider.signer();
+                                            const account = await signer.getAddress();
+                                            
+                                            setAccount(account);
                                         }
                                     }
                                 }>Connect Wallet</Button> : <Nav.Item>{account}</Nav.Item>
