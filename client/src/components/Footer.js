@@ -5,8 +5,7 @@ import { Link } from 'react-router-dom';
 function Footer() {
     return (
         <>
-            <br />
-            <hr />
+            <hr style={{ marginTop: '75px' }} />
             <Navbar collapseOnSelect expand="lg" variant="dark" sticky="bottom">
                 <Container>
                     <Navbar.Text>Copyright © <strong>ProjectName</strong></Navbar.Text>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { getWallet } from '../web3';
+import { connect } from '../web3';
 
 import Nav from 'react-bootstrap/Nav';
 import { Link } from 'react-router-dom';
@@ -20,7 +20,7 @@ function NavigationBar() {
                     <Navbar.Brand>
                         <Link to="/" style={{ textDecoration: 'none', color: '#6163ff' }}>
                             <img alt="" src="https://react-bootstrap.netlify.app/logo.svg" width="30" height="30" className="d-inline-block align-top" />
-                            {' '}React Bootstrap
+                            {' '}ProjectName
                         </Link>
                     </Navbar.Brand>
                     <Navbar.Toggle aria-controls="responsive-navbar-nav" />
@@ -38,14 +38,17 @@ function NavigationBar() {
                         <Nav>
                             {account === null ?
                                 <Button variant="primary" style={{ backgroundColor: '#6163ff' }} onClick={
-                                    async () => setAccount(await getWallet())
-                                }>Connect Wallet</Button> : <Nav.Item>{account}</Nav.Item>                         
+                                    async () => {
+                                        if (window.ethereum && window.ethereum.isConnected()) {
+                                            setAccount(await connect(account));
+                                        }
+                                    }
+                                }>Connect Wallet</Button> : <Nav.Item>{account}</Nav.Item>
                             }
                         </Nav>
                     </Navbar.Collapse>
                 </Container>
             </Navbar>
-            <br />
         </>
     );
 };

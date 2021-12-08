@@ -1,3 +1,15 @@
+/* 
+ * ==================================================
+ * Content section, only for the home content.
+ * ==================================================
+*/
+
+
+/* 
+ * ==================================================
+ * Campaign section, only for the campaigns.
+ * ==================================================
+*/
 /* Nav part */
 .Nav-item {
     color: rgba(255,255,255,.55);
@@ -51,4 +63,9 @@
 
 .progress-bar {
     background-color: #6163ff;
+}
+
+h5 {
+    font-style: italic;
+    color: rgba(255,255,255,.55);
 }
