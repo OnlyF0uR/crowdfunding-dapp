@@ -1,19 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
-import "./ReentrancyGuard.sol";
 
-contract CrowdFunding is ReentrancyGuard {
+contract CrowdFunding {
     address owner;
 
-    constructor() ReentrancyGuard() {
+    modifier adminOnly() {
+        require(msg.sender == owner);
+        _;
+    }
+
+    constructor() {
         owner = msg.sender;
     }
-
-    modifier adminOnly() {
-        if (msg.sender == owner) _;
-    }
-
-    // Structure for the campaign object
+    
     struct Campaign {
         address host;
         uint256 expires;
@@ -24,70 +23,52 @@ contract CrowdFunding is ReentrancyGuard {
 
     uint256 prevId;
 
+    uint256 gasUsed; // DEBUG
     function submit() public payable {
+        uint256 startGas = gasleft(); // DEBUG
+
         // TODO: Manufactur a somewhat consistent price taking into account future gas prices
-        (bool sent, ) = payable(owner).call{value: msg.value}("");
-        require(sent, "Failed to send Ether");
+        (bool success, ) = payable(owner).call{value: msg.value}("");
+        require(success, "Transfer failed.");
+
+        gasUsed = startGas - gasleft(); // DEBUG
     }
+    
+    function getDebug() public view returns(uint256) { return gasUsed; } // DEBUG
 
     function mint(address host, uint256 exp) public adminOnly {
-        // Increment the id
         prevId++;
-        // Submit the campaign
         campaigns[prevId] = Campaign(host, 0, exp);
     }
 
-    function claim(uint256 id) public nonReentrant {
-        // Check for authority
-        require(
-            campaigns[id].host == msg.sender,
-            "You can only claim your own campaign."
-        );
-        // Check if campaign can be claimed
-        require(
-            campaigns[id].expires > block.timestamp,
-            "Campaign is still active."
-        );
-        // Check if there is money to be claimed
-        require(campaigns[id].balance > 0);
+    function claim(uint256 id) public {
+        require(campaigns[id].host == msg.sender, "Not your campaign.");
+        require(campaigns[id].expires > block.timestamp, "Campaign is active.");
 
-        uint256 bal = campaigns[id].balance;
-
-        // NOTE: Just for safety since this really should not happen.
-        require(
-            address(this).balance >= bal,
-            "The contract does not have enough liquidity, please try again later."
-        );
-
-        // Transfer the money to the campaign hoster/claimer
-        (bool sent, ) = payable(msg.sender).call{value: bal}("");
-        require(sent, "Failed to send Ether");
+        // Will also occur on claiming twice, claiming twice is also 'covered' by the frontend
+        require(campaigns[id].balance > 0, "No money to be claimed.");
+        
+        // ===================================
+        // Checks
+        uint256 share = campaigns[id].balance;
+        require(address(this).balance >= share, "Not have enough liquidity.");
+        // Effects
+        campaigns[id].balance = 0;
+        // Interactions
+        (bool success, ) = payable(msg.sender).call{value: share}("");
+        require(success, "Transfer failed.");
     }
 
-    function donate(uint256 id) public payable {
-        require(
-            campaigns[id].host != msg.sender,
-            "A host cannot donate to their own campaign."
-        );
-        require(
-            campaigns[id].expires <= block.timestamp,
-            "Campaign has been closed."
-        );
+    function deposit(uint256 id, uint256 amount) payable public {
+        require(msg.value == amount);
 
-        // Transfer the money to the campaign hoster/claimer
-        (bool sent, ) = payable(address(this)).call{value: msg.value}("");
-        require(sent, "Failed to send Ether");
+        require(campaigns[id].host != msg.sender, "Cannot donate to own campaign.");
+        require(campaigns[id].expires <= block.timestamp, "Campaign has been closed.");
+
+        campaigns[id].balance += amount;
     }
 
-    function get(uint256 id)
-        public
-        view
-        returns (
-            address host,
-            uint256 expires,
-            uint256 balance
-        )
-    {
+    function get(uint256 id) public view returns (address, uint256, uint256) {
         Campaign storage cmp = campaigns[id];
         return (cmp.host, cmp.expires, cmp.balance);
     }
