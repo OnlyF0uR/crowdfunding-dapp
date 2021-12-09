@@ -1,4 +1,3 @@
-import Navbar from '../Navbar';
 import { useParams } from 'react-router-dom';
 
 function CampaignPage() {
@@ -6,7 +5,6 @@ function CampaignPage() {
 
     return (
         <>
-            <Navbar />
             <p>Campaign with id: {campaignId}</p>
         </>
     );

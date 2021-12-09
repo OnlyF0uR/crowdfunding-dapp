@@ -129,7 +129,7 @@ function HomeFuture() {
                 </Row>
             </Container>
         </>
-    )
+    );
 };
 
 export {

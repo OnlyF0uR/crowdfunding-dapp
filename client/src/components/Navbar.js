@@ -40,10 +40,10 @@ function NavigationBar({ provider }) {
                                     async () => {
                                         if (provider !== null) {
                                             await provider.send("eth_requestAccounts", []);
-                                            
+
                                             const signer = provider.signer();
                                             const account = await signer.getAddress();
-                                            
+
                                             setAccount(account);
                                         }
                                     }

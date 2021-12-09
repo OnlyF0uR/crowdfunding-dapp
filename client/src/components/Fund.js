@@ -1,9 +1,6 @@
-import Navbar from './Navbar';
-
 function FundCreate() {
     return (
         <>
-            <Navbar />
             <p>Fund create</p>
         </>
     );
@@ -12,7 +9,6 @@ function FundCreate() {
 function FundList() {
     return (
         <>
-            <Navbar />
             <p>Fund create</p>
         </>
     );
@@ -21,7 +17,6 @@ function FundList() {
 function FundDocs() {
     return (
         <>
-            <Navbar />
             <p>Fund docs</p>
         </>
     );

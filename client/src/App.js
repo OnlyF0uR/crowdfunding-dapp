@@ -14,27 +14,26 @@ import { FundCreate, FundList, FundDocs } from './components/Fund';
 import CampaignPage from './components/campaigns/CampaignPage';
 import Navbar from './components/Navbar';
 
-// https://www.w3schools.com/react/react_usecontext.asp
-// const ProviderContext = createContext();
-// const ContractContext = createContext();
-
 function App() {
     const [web3, setWeb3] = useState({ provider: null, contract: null });
 
     useEffect(() => {
         const setup = async () => {
-            // TODO: Add checks for window.ethereum existance
-            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            if (typeof window.ethereum === 'undefined') {
+                console.log('MetaMask is not installed.');
+            } else {
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
 
-            const network = await provider.getNetwork();
-            const address = smartContract.networks[network.chainId].address;
+                const network = await provider.getNetwork();
+                const address = smartContract.networks[network.chainId].address;
 
-            const contract = new ethers.Contract(address, smartContract.abi, provider.getSigner());
+                const contract = new ethers.Contract(address, smartContract.abi, provider.getSigner());
 
-            setWeb3({ provider: provider, contract: contract });
+                setWeb3({ provider: provider, contract: contract });
+            }
         }
         setup();
-    }, [])
+    }, []);
 
     return (
         <div className="App">
@@ -43,19 +42,43 @@ function App() {
                 <Route path="/" element={<>
                     <Navbar provider={web3.provider} />
                     <HomeContent />
-                    {web3.contract != null ? <HomeCampaigns campaigns={getCampaigns(true)} /> : ""}
+                    {web3.contract != null ? <HomeCampaigns campaigns={getCampaigns()} /> : ""}
                     <HomeFuture />
                     <Footer />
                 </>} />
-                <Route path="/explore" element={<Explore />} />
-                <Route path="/campaign/:campaignId" element={<CampaignPage />} />
-                <Route path="/news" element={<News />} />
-                <Route path="/fund/create" element={<FundCreate />} />
-                <Route path="/fund/list" element={<FundList />} />
-                <Route path="/fund/docs" element={<FundDocs />} />
+                <Route path="/explore" element={<>
+                    <Navbar provider={web3.provider} />
+                    <Explore />
+                    <Footer />
+                </>} />
+                <Route path="/campaign/:campaignId" element={<>
+                    <Navbar provider={web3.provider} />
+                    <CampaignPage />
+                    <Footer />
+                </>} />
+                <Route path="/news" element={<>
+                    <Navbar provider={web3.provider} />
+                    <News />
+                    <Footer />
+                </>} />
+                <Route path="/fund/create" element={<>
+                    <Navbar provider={web3.provider} />
+                    <FundCreate />
+                    <Footer />
+                </>} />
+                <Route path="/fund/list" element={<>
+                    <Navbar provider={web3.provider} />
+                    <FundList />
+                    <Footer />
+                </>} />
+                <Route path="/fund/docs" element={<>
+                    <Navbar provider={web3.provider} />
+                    <FundDocs />
+                    <Footer />
+                </>} />
             </Routes>
         </div>
-    )
+    );
 };
 
 export default App;
