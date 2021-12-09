@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Link } from 'react-router-dom';
 import { ethers } from 'ethers';
 import { getCampaigns } from './utils';
-import smartContract from './contracts/SimpleStorage.json'
+import smartContract from './contracts/CrowdFunding.json'
 
 // Style & Components
 import './App.css';
@@ -13,6 +13,7 @@ import News from './components/News';
 import { FundCreate, FundList, FundDocs } from './components/Fund';
 import CampaignPage from './components/campaigns/CampaignPage';
 import Navbar from './components/Navbar';
+import Error from './components/Error';
 
 function App() {
     const [web3, setWeb3] = useState({ provider: null, contract: null });
@@ -37,46 +38,27 @@ function App() {
 
     return (
         <div className="App">
+            <Navbar provider={web3.provider} />
             <Routes>
-                <Route path="*" element={<p>page not found</p>} />
+                <Route path="*" element={
+                    <Error image="https://cdn.pixabay.com/photo/2018/01/04/15/51/404-error-3060993_960_720.png">
+                        <h3>404 | Page not found</h3>
+                        <p>The page you were looking for simply does not exist anymore or never existed.<br />If you're looking for a specific page then please take a look at the navigation menu or <Link to="/">return</Link> to the homepage.</p>
+                    </Error>
+                } />
                 <Route path="/" element={<>
-                    <Navbar provider={web3.provider} />
                     <HomeContent />
                     {web3.contract != null ? <HomeCampaigns campaigns={getCampaigns()} /> : ""}
                     <HomeFuture />
-                    <Footer />
                 </>} />
-                <Route path="/explore" element={<>
-                    <Navbar provider={web3.provider} />
-                    <Explore />
-                    <Footer />
-                </>} />
-                <Route path="/campaign/:campaignId" element={<>
-                    <Navbar provider={web3.provider} />
-                    <CampaignPage />
-                    <Footer />
-                </>} />
-                <Route path="/news" element={<>
-                    <Navbar provider={web3.provider} />
-                    <News />
-                    <Footer />
-                </>} />
-                <Route path="/fund/create" element={<>
-                    <Navbar provider={web3.provider} />
-                    <FundCreate />
-                    <Footer />
-                </>} />
-                <Route path="/fund/list" element={<>
-                    <Navbar provider={web3.provider} />
-                    <FundList />
-                    <Footer />
-                </>} />
-                <Route path="/fund/docs" element={<>
-                    <Navbar provider={web3.provider} />
-                    <FundDocs />
-                    <Footer />
-                </>} />
+                <Route path="/explore" element={<Explore />} />
+                <Route path="/campaign/:campaignId" element={<CampaignPage />} />
+                <Route path="/news" element={<News />} />
+                <Route path="/fund/create" element={<FundCreate />} />
+                <Route path="/fund/list" element={<FundList />} />
+                <Route path="/fund/docs" element={<FundDocs />} />
             </Routes>
+            <Footer />
         </div>
     );
 };

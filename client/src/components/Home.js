@@ -59,51 +59,49 @@ function HomeCampaigns(props) {
     }, [props]);
 
     return (
-        <>
-            <div style={{ marginTop: '75px' }}>
-                <h1>Explore Campaigns</h1>
-                <Nav className="justify-content-center" onSelect={(key) => {
-                    setCampaign({ key: key, content: props.campaigns[key] });
-                }}>
-                    <Nav.Item>
-                        {/* So that hot is highlighted by default */}
-                        <Nav.Link eventKey="hot" className={campaign.key === 'hot' ? "Nav-item active" : "Nav-item"}>Hot 🔥</Nav.Link>
-                    </Nav.Item>
-                    <Nav.Item>
-                        <Nav.Link eventKey="charity" className="Nav-item">Charity</Nav.Link>
-                    </Nav.Item>
-                    <Nav.Item>
-                        <Nav.Link eventKey="startup" className="Nav-item">Startup</Nav.Link>
-                    </Nav.Item>
-                    <Nav.Item>
-                        <Nav.Link eventKey="launchpad" className="Nav-item">Launchpad 🚀</Nav.Link>
-                    </Nav.Item>
-                </Nav>
-                <div className="Campaigns">
-                    {campaign.content.length === 0 ? <><h5>No campaigns were found...</h5></> : <Row xs={1} md={4} className="g-5">
-                        {campaign.content.map((data, idx) => (
-                            <Col key={idx}>
-                                <Link to={`/campaign/${data.id}`} style={{ textDecoration: 'none', color: '#fff' }}>
-                                    <Card className="Card">
-                                        <Card.Img variant="top" src={data["image"]} />
-                                        <Card.Body>
-                                            <Card.Title className="Card-title">{data['title']}</Card.Title>
-                                            <Card.Text className="Card-adr">{data['adr']}</Card.Text>
-                                            <hr />
-                                            <Card.Text className="Card-desc">{data['desc']}</Card.Text>
+        <div style={{ marginTop: '75px' }}>
+            <h1>Explore Campaigns</h1>
+            <Nav className="justify-content-center" onSelect={(key) => {
+                setCampaign({ key: key, content: props.campaigns[key] });
+            }}>
+                <Nav.Item>
+                    {/* So that hot is highlighted by default */}
+                    <Nav.Link eventKey="hot" className={campaign.key === 'hot' ? "Nav-item active" : "Nav-item"}>Hot 🔥</Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                    <Nav.Link eventKey="charity" className="Nav-item">Charity</Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                    <Nav.Link eventKey="startup" className="Nav-item">Startup</Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                    <Nav.Link eventKey="launchpad" className="Nav-item">Launchpad 🚀</Nav.Link>
+                </Nav.Item>
+            </Nav>
+            <div className="Campaigns">
+                {campaign.content.length === 0 ? <><h5>No campaigns were found...</h5></> : <Row xs={1} md={4} className="g-5">
+                    {campaign.content.map((data, idx) => (
+                        <Col key={idx}>
+                            <Link to={`/campaign/${data.id}`} style={{ textDecoration: 'none', color: '#fff' }}>
+                                <Card className="Card">
+                                    <Card.Img variant="top" src={data["image"]} />
+                                    <Card.Body>
+                                        <Card.Title className="Card-title">{data['title']}</Card.Title>
+                                        <Card.Text className="Card-adr">{data['adr']}</Card.Text>
+                                        <hr />
+                                        <Card.Text className="Card-desc">{data['desc']}</Card.Text>
 
-                                            <hr />
-                                            <Card.Text className="Card-prog">{data['progress']['currency'] + ' ' + roundNumber(data['progress']['current'], 1000000) + '/' + roundNumber(data['progress']['goal'], 10)}</Card.Text>
-                                            <ProgressBar animated className="Card-progbar" now={data['progress']['current'] / data['progress']['goal'] * 100} />
-                                        </Card.Body>
-                                    </Card>
-                                </Link>
-                            </Col>
-                        ))}
-                    </Row>}
-                </div>
+                                        <hr />
+                                        <Card.Text className="Card-prog">{data['progress']['currency'] + ' ' + roundNumber(data['progress']['current'], 1000000) + '/' + roundNumber(data['progress']['goal'], 10)}</Card.Text>
+                                        <ProgressBar animated className="Card-progbar" now={data['progress']['current'] / data['progress']['goal'] * 100} />
+                                    </Card.Body>
+                                </Card>
+                            </Link>
+                        </Col>
+                    ))}
+                </Row>}
             </div>
-        </>
+        </div>
     );
 };
 

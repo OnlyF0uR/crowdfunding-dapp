@@ -1,6 +1,8 @@
 function Explore() {
     return (
-        <p>Exploring is awesome</p>
+        <div style={{ marginTop: '75px' }}>
+            <p>Exploring is awesome</p>
+        </div>
     );
 };
 
