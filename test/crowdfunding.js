@@ -1,5 +1,5 @@
 const CrowndFunding = artifacts.require('CrowdFunding.sol');
 
-contract("CrowdFunding", accounts => {
+contract("CrowdFunding", (accounts) => {
     // TODO: Implement testing
 });
