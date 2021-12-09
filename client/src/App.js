@@ -31,7 +31,7 @@ function App() {
 
                 setWeb3({ provider: provider, contract: contract });
             }
-        }
+        };
         setup();
     }, []);
 
