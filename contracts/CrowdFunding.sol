@@ -32,14 +32,14 @@ contract CrowdFunding {
 
     receive() external payable {}
 
-    function deposit(uint256 id) public payable {
-        require(campaigns[id].host != msg.sender, "Cannot donate to own campaign");
-        require(campaigns[id].expires > block.timestamp, "Campaign has been closed");
+    function deposit(uint256 _id) public payable {
+        require(campaigns[_id].host != msg.sender, "Cannot donate to own campaign");
+        require(campaigns[_id].expires > block.timestamp, "Campaign has been closed");
 
         (bool success, ) = payable(owner).call{value: msg.value}("");
         require(success, "Transfer failed");
 
-        campaigns[id].balance += msg.value;
+        campaigns[_id].balance += msg.value;
         emit Deposit(msg.sender, _id, msg.value);
     }
 
