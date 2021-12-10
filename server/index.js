@@ -7,6 +7,7 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const { withAuth } = require('./middleware');
+const { getBriefData, getPageData, getSingleData, getUnverifiedCampaigns } = require('./data');
 
 const app = express();
 const scrypt = promisify(crypto.scrypt);
@@ -25,11 +26,26 @@ app.use(cors({
 // DEFAULT ROUTES
 // ===================================
 app.get('/api/campaigns/:id', (req, res) => {
-    // TODO: This
+    const { id } = req.params;
+
+    const data = await getSingleData(id);
+
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify(data));
 });
 
-app.post('/api/campaigns/', (req, res) => {
-    // TODO: This
+app.post('/api/campaigns/', async (req, res) => {
+    const { brief, page } = req.body;
+
+    let data;
+
+    if (brief) {
+        data = await getBriefData();
+    } else {
+        data = await getPageData(page);
+    }
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify(data));
 });
 
 // ===================================
@@ -49,19 +65,52 @@ app.post('/api/priv/login', (req, res) => {
     });
 
     const isEqual = crypto.timingSafeEqual(buffer, derKey);
-    // TODO: This
+    if (!isEqual) {
+        return res.status(401).end();
+    }
+
+    const token = jwt.sign(process.env.JWT_PWD, process.env.JWT_KEY, {
+		expiresIn: '1h'
+	});
+
+    res.cookie('token', token).status(200).end();
 });
 
 app.get('/api/priv/unverified-campaigns', withAuth, (req, res) => {
     const { psph } = req.body;
 
-    // TODO: This
+    const buffer = Buffer.from(process.env.PSPH_HASH, 'hex');
+
+    const hash = crypto.createHash('sha512');
+    const data = hash.update(psph, 'utf-8');
+    const derPsph = data.digest('hex');
+
+    const isEqual = crypto.timingSafeEqual(buffer, derPsph);
+    if (!isEqual) {
+        return res.status(401).end();
+    }
+
+    const data = await getUnverifiedCampaigns(id);
+
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify(data));
 });
 
 app.post('/api/priv/verify-campaign', withAuth, (req, res) => {
-    const { psph } = req.body;
+    const { psph, cat, id } = req.body;
 
-    // TODO: This
+    const buffer = Buffer.from(process.env.PSPH_HASH, 'hex');
+
+    const hash = crypto.createHash('sha512');
+    const data = hash.update(psph, 'utf-8');
+    const derPsph = data.digest('hex');
+
+    const isEqual = crypto.timingSafeEqual(buffer, derPsph);
+    if (!isEqual) {
+        return res.status(401).end();
+    }
+
+    // ...
 });
 
 // ===================================
