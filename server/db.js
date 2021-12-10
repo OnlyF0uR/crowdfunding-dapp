@@ -13,11 +13,11 @@ const pool = new Pool({
 
 const query = (query, params) => !params ? pool.query(query) : pool.query(query, params);
 
-const fetchBriefData = async () => {
+const fetchBriefIds = async () => {
    const { rows } = await query(`
       (
       SELECT
-         id, account, title, short_desc, goal, img, expires 
+         id 
       FROM
          campaigns c1 
       WHERE
@@ -37,7 +37,7 @@ const fetchBriefData = async () => {
       UNION ALL
       (
       SELECT
-         id, account, title, short_desc, goal, img, expires 
+         id 
       FROM
          campaigns c1 
       WHERE
@@ -57,7 +57,7 @@ const fetchBriefData = async () => {
       UNION ALL
       (
       SELECT
-         id, account, title, short_desc, goal, img, expires 
+         id 
       FROM
          campaigns c1 
       WHERE
@@ -77,7 +77,7 @@ const fetchBriefData = async () => {
       UNION ALL
       (
       SELECT
-         id, account, title, short_desc, goal, img, expires 
+         id 
       FROM
          campaigns c1 
       WHERE
@@ -99,7 +99,7 @@ const fetchBriefData = async () => {
    return rows;
 };
 
-const fetchExploreData = async () => {
+const fetchAllData = async () => {
    const { rows } = await query(`
       SELECT
          id,
@@ -127,8 +127,8 @@ const fetchUnverifiedData = async () => {
 }
 
 module.exports = {
-   fetchBriefData,
-   fetchExploreData,
+   fetchBriefIds,
+   fetchAllData,
 
    fetchUnverifiedData
 };

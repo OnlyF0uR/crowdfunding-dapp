@@ -8,10 +8,15 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const { withAuth } = require('./middleware');
 const redis = require('redis');
-const { fetchBriefData, fetchExploreData, fetchUnverifiedData } = require('./db');
+const { fetchBriefIds, fetchAllData, fetchUnverifiedData } = require('./db');
 
 const app = express();
 const scrypt = promisify(crypto.scrypt);
+/**
+ * brief: int[] --> Contains the selection and order
+ * explore: int[] --> Contains the entire order
+ * 0: {}
+ */
 const client = redis.createClient();
 
 const setAsync = promisify(client.set).bind(client);
@@ -30,15 +35,6 @@ app.use(cors({
 // ===================================
 // DEFAULT ROUTES
 // ===================================
-app.get('/api/campaigns/:id', (req, res) => {
-    const { id } = req.params;
-
-    const data = await getSingleData(id);
-
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(data));
-});
-
 app.post('/api/campaigns/', async (req, res) => {
     const { brief, page } = req.body;
 
@@ -47,8 +43,25 @@ app.post('/api/campaigns/', async (req, res) => {
     if (brief) {
         // TODO: Fetch from redis
     } else {
-        // TODO: Fetch from redis
+        /**
+         * Page1: 0 - 19
+         * Page2: 20 - 39
+         * Page3: 40 - 59
+         */
+        for (let i = (page - 1) * 20; i <= (page - 1) * 20 + 19; i++) {
+            console.log(i)
+        }
     }
+
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify(data));
+});
+
+app.get('/api/campaigns/:id', (req, res) => {
+    const { id } = req.params;
+
+    // TODO: Fetch a single campaign from the database
+    const data = null;
 
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(data));
@@ -82,7 +95,7 @@ app.post('/api/priv/login', (req, res) => {
     res.cookie('token', token).status(200).end();
 });
 
-app.get('/api/priv/unverified-campaigns', withAuth, (req, res) => {
+app.get('/api/priv/campaigns', withAuth, (req, res) => {
     const { psph } = req.body;
 
     const buffer = Buffer.from(process.env.PSPH_HASH, 'hex');
@@ -102,7 +115,7 @@ app.get('/api/priv/unverified-campaigns', withAuth, (req, res) => {
     res.end(JSON.stringify(data));
 });
 
-app.post('/api/priv/review-campaign', withAuth, (req, res) => {
+app.post('/api/priv/campaigns/review', withAuth, (req, res) => {
     // id INT, verify BOOLEAN, cat VARCHAR
     const { psph, id, verify, cat } = req.body;
 
@@ -129,12 +142,20 @@ const port = process.env.PORT || 3000;
 
 const handleCache = async () => {
     // Fetch data from database and cache it
-    const briefData = await fetchBriefData();
-    const exploreData = await fetchExploreData();
+    const briefIds = await fetchBriefIds();
+    await setAsync('brief', JSON.parse(briefIds));
 
-    console.log(briefData, exploreData);
+    const exploreData = await fetchAllData(); 
+    const order = [];
+    for (let i = 0; i < exploreData.length; i++) {
+        const id = exploreData[i].id;
+        order.push(id);
+        
+        delete exploreData[i].id;
+        await setAsync(id, exploreData[i]);
+    }
 
-    // TODO: Add to cache
+    await setAsync('all', order);
 }
 
 const main = async () => {
