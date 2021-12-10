@@ -1,13 +1,19 @@
-const { query } = require('./db');
+const { Pool } = require('pg');
+
+const pool = new Pool({
+    host: process.env.DB_HOSTNAME,
+    user: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_DATABASE,
+    port: process.env.DB_PORT,
+    idleTimeoutMillis: 0,
+    connectionTimeoutMillis: 0,
+    max: 25
+});
+
+const query = (query, params) => !params ? pool.query(query) : pool.query(query, params);
 
 const getBriefData = async () => {
-    /**
-     * Indexes:
-     * 0 - 7 = hot (cat, newest)
-     * 8 - 15 = charity (cat, newest)
-     * 16 - 23 = startup (cat, newest)
-     * 24 - 31 = launchpad (cat, newest)
-     */
     const { rows } = await query(`
     (
     SELECT
@@ -83,11 +89,13 @@ const getBriefData = async () => {
     `);
 
     console.log(rows);
+    // TODO: This
 };
 
 const getPageData = async (page) => {
     // Obtain all active campaigns sorted deadline (closest to expiring >)
     // Calculate appropiate id's based on page (25 per page)
+    // TODO: This
 };
 
 const getSingleData = async (id) => {
@@ -97,16 +105,23 @@ const getSingleData = async (id) => {
 
     const { rows } = await query('SELECT account, title, short_desc, goal, img, expires FROM campaigns WHERE id = $1::int', [id]);
     console.log(rows);
+    // TODO: This
 };
 
 const getUnverifiedCampaigns = async () => {
     const { rows } = await query('SELECT * FROM campaigns WHERE verified IS NOT TRUE');
     console.log(rows);
+    // TODO: This
+};
+
+const verifyCampaign = async (id) => {
+    // TODO: This
 };
 
 module.exports = {
     getBriefData,
     getPageData,
     getSingleData,
-    getUnverifiedCampaigns
+    getUnverifiedCampaigns,
+    verifyCampaign
 };
