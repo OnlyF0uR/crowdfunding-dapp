@@ -7,10 +7,15 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const { withAuth } = require('./middleware');
-const { getBriefData, getPageData, getSingleData, getUnverifiedCampaigns } = require('./data');
+const redis = require('redis');
+const { fetchBriefData, fetchExploreData, fetchUnverifiedData } = require('./db');
 
 const app = express();
 const scrypt = promisify(crypto.scrypt);
+const client = redis.createClient();
+
+const setAsync = promisify(client.set).bind(client);
+const getAsync = promisify(client.get).bind(client);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -40,10 +45,11 @@ app.post('/api/campaigns/', async (req, res) => {
     let data;
 
     if (brief) {
-        data = await getBriefData();
+        // TODO: Fetch from redis
     } else {
-        data = await getPageData(page);
+        // TODO: Fetch from redis
     }
+
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(data));
 });
@@ -70,8 +76,8 @@ app.post('/api/priv/login', (req, res) => {
     }
 
     const token = jwt.sign(process.env.JWT_PWD, process.env.JWT_KEY, {
-		expiresIn: '1h'
-	});
+        expiresIn: '1h'
+    });
 
     res.cookie('token', token).status(200).end();
 });
@@ -90,14 +96,15 @@ app.get('/api/priv/unverified-campaigns', withAuth, (req, res) => {
         return res.status(401).end();
     }
 
-    const data = await getUnverifiedCampaigns(id);
+    const data = await fetchUnverifiedData();
 
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(data));
 });
 
-app.post('/api/priv/verify-campaign', withAuth, (req, res) => {
-    const { psph, cat, id } = req.body;
+app.post('/api/priv/review-campaign', withAuth, (req, res) => {
+    // id INT, verify BOOLEAN, cat VARCHAR
+    const { psph, id, verify, cat } = req.body;
 
     const buffer = Buffer.from(process.env.PSPH_HASH, 'hex');
 
@@ -110,10 +117,35 @@ app.post('/api/priv/verify-campaign', withAuth, (req, res) => {
         return res.status(401).end();
     }
 
-    // ...
+    if (verify) {
+        // TODO: Verify campaign and apply category
+    } else {
+        // TODO: Delete campaign
+    }
 });
 
 // ===================================
 const port = process.env.PORT || 3000;
 
-app.listen(port, () => console.log(`CrowdFunding app listening on port ${port}.`));
+const handleCache = async () => {
+    // Fetch data from database and cache it
+    const briefData = await fetchBriefData();
+    const exploreData = await fetchExploreData();
+
+    console.log(briefData, exploreData);
+
+    // TODO: Add to cache
+}
+
+const main = async () => {
+    console.log('Started caching...')
+    await handleCache();
+    console.log('Cached data...')
+    setInterval(async() => handleCache, 1000 * 60 * 60);
+    console.log('Initiated interval...')
+
+    // Listen on the appropiate port
+    app.listen(port, () => console.log(`Listening on port ${port}.`));
+}
+
+main();

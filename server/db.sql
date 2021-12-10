@@ -12,14 +12,14 @@ CREATE TABLE IF NOT EXISTS campaigns(
     verified BOOLEAN NOT NULL
 );
 
--- Select campaigns for the brief section
+-- Select brief by newest first
 (
 SELECT
    id, account, title, short_desc, goal, img, expires 
 FROM
    campaigns c1 
 WHERE
-   expires = 
+   id = 
    (
       SELECT
          MAX(c2.id) 
@@ -39,7 +39,7 @@ SELECT
 FROM
    campaigns c1 
 WHERE
-   expires = 
+   id = 
    (
       SELECT
          MAX(c2.id) 
@@ -59,7 +59,7 @@ SELECT
 FROM
    campaigns c1 
 WHERE
-   expires = 
+   id = 
    (
       SELECT
          MAX(c2.id) 
@@ -79,7 +79,7 @@ SELECT
 FROM
    campaigns c1 
 WHERE
-   expires = 
+   id = 
    (
       SELECT
          MAX(c2.id) 
@@ -93,5 +93,20 @@ WHERE
    LIMIT 8
 );
 
--- Select campaigns by page
--- TODO: This
+-- Select campaign by close to expire first
+SELECT
+    id,
+    account,
+    title,
+    short_desc,
+    goal,
+    img,
+    expires
+FROM
+    campaigns
+WHERE
+    verified IS TRUE AND
+    expires - CAST(EXTRACT(epoch FROM NOW()) AS INT) > 0
+ORDER BY
+    expires - CAST(EXTRACT(epoch FROM NOW()) AS INT) ASC
+;
