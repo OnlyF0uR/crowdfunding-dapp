@@ -81,7 +81,7 @@ function FundCreate() {
                 </Form.Group>
 
                 <Form.Label>Duration ({duration} days)</Form.Label>
-                <Form.Range min="1" max="31" defaultValue="7" onChange={(e) => setDuration(e.target.value)} required />
+                <Form.Range min="1" max="90" defaultValue="7" onChange={(e) => setDuration(e.target.value)} required />
 
                 {/* TODO: Add goal */}
 

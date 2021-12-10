@@ -3,67 +3,54 @@ pragma solidity ^0.8.10;
 
 contract CrowdFunding {
     address owner;
-
-    mapping(address => bool) mods;
+    uint256 nextId;
+    struct Campaign {
+       address host;
+       uint256 balance;
+       uint256 expires;
+    }
+    mapping(uint256 => Campaign) public campaigns;
 
     constructor() {
         owner = msg.sender;
-        mods[msg.sender] = true;
-    }
-    
-    struct Campaign {
-        address host;
-        uint256 balance;
-        uint256 expires;
     }
 
-    function addMod(address newMod) public {
-        require(msg.sender == owner);
-        mods[newMod] = true;
-    }
-
-    mapping(uint256 => Campaign) public campaigns;
-
-    event Deposit(
-        address indexed _from,
-        uint256 indexed _id,
-        uint256 _value
-    );
+    event Reserved(address indexed _from, uint256 indexed _id);
+    event Approval(uint256 indexed _id);
+    event Deposit(address indexed _from, uint256 indexed _id, uint256 _value);
 
     receive() external payable {}
 
+    function reserve(uint256 expires) public {
+        require(expires < block.timestamp + 7776000);
+
+        campaigns[nextId] = Campaign(msg.sender, 0, expires);
+        emit Reserved(msg.sender, nextId);
+
+        nextId++;
+    }
+
     function deposit(uint256 _id) public payable {
         require(campaigns[_id].host != msg.sender, "Cannot donate to own campaign");
-        require(campaigns[_id].expires > block.timestamp, "Campaign has been closed");
-
-        (bool success, ) = payable(owner).call{value: msg.value}("");
-        require(success, "Transfer failed");
-
+        require(campaigns[_id].expires > block.timestamp, "Campaign is not active");
+        
         campaigns[_id].balance += msg.value;
         emit Deposit(msg.sender, _id, msg.value);
     }
 
-    uint256 prevId;
-    function mint(address host, uint256 exp) public {
-        require(mods[msg.sender], "You are not a moderator");
-
-        campaigns[prevId] = Campaign(host, 0, exp);
-        prevId++;
-    }
-
-    function claim(uint256 id) public {
-        require(campaigns[id].host == msg.sender, "Not your campaign");
-        require(campaigns[id].expires <= block.timestamp, "Campaign is active");
+    function claim(uint256 _id) public {
+        require(campaigns[_id].host == msg.sender, "Not your campaign");
+        require(campaigns[_id].expires <= block.timestamp, "Campaign is active");
 
         // Will also occur on claiming twice, claiming twice is also 'covered' by the frontend
-        require(campaigns[id].balance > 0, "No money to be claimed");
+        require(campaigns[_id].balance > 0, "No money to be claimed");
         
         // ===================================
         // Checks
-        uint256 share = campaigns[id].balance;
-        require(address(this).balance >= share, "Not have enough liquidity");
+        uint256 share = campaigns[_id].balance / 100 * 95;
+        require(address(this).balance >= share);
         // Effects
-        campaigns[id].balance = 0;
+        campaigns[_id].balance = 0;
         // Interactions
         (bool success, ) = payable(msg.sender).call{value: share}("");
         require(success, "Transfer failed");
