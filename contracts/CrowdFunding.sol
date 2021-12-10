@@ -43,7 +43,7 @@ contract CrowdFunding {
         require(campaigns[_id].expires <= block.timestamp, "Campaign is active");
 
         // Will also occur on claiming twice, claiming twice is also 'covered' by the frontend
-        require(campaigns[_id].balance > 0, "No money to be claimed");
+        require(campaigns[_id].balance > 100, "No money to be claimed");
         
         // ===================================
         // Checks
