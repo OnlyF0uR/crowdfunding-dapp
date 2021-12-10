@@ -48,6 +48,7 @@ function HomeContent() {
     );
 };
 
+// TODO: Fetch data and fetch from blockchain (Somehow out of sync? Don't display)
 function HomeCampaigns(props) {
     const [campaign, setCampaign] = useState({ key: null, content: [] });
 

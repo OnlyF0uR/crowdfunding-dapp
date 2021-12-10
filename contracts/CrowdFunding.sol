@@ -4,72 +4,68 @@ pragma solidity ^0.8.10;
 contract CrowdFunding {
     address owner;
 
-    modifier adminOnly() {
-        require(msg.sender == owner);
-        _;
-    }
+    mapping(address => bool) mods;
 
     constructor() {
         owner = msg.sender;
+        mods[msg.sender] = true;
     }
     
     struct Campaign {
         address host;
-        uint256 expires;
         uint256 balance;
+        uint256 expires;
+    }
+
+    function addMod(address newMod) public {
+        require(msg.sender == owner);
+        mods[newMod] = true;
     }
 
     mapping(uint256 => Campaign) public campaigns;
 
-    uint256 prevId;
+    event Deposit(
+        address indexed _from,
+        uint256 indexed _id,
+        uint256 _value
+    );
 
-    uint256 gasUsed; // DEBUG
-    function submit() public payable {
-        uint256 startGas = gasleft(); // DEBUG
+    receive() external payable {}
 
-        // TODO: Manufactur a somewhat consistent price taking into account future gas prices
+    function deposit(uint256 id) public payable {
+        require(campaigns[id].host != msg.sender, "Cannot donate to own campaign");
+        require(campaigns[id].expires > block.timestamp, "Campaign has been closed");
+
         (bool success, ) = payable(owner).call{value: msg.value}("");
-        require(success, "Transfer failed.");
+        require(success, "Transfer failed");
 
-        gasUsed = startGas - gasleft(); // DEBUG
+        campaigns[id].balance += msg.value;
+        emit Deposit(msg.sender, _id, msg.value);
     }
-    
-    function getDebug() public view returns(uint256) { return gasUsed; } // DEBUG
 
-    function mint(address host, uint256 exp) public adminOnly {
-        prevId++;
+    uint256 prevId;
+    function mint(address host, uint256 exp) public {
+        require(mods[msg.sender], "You are not a moderator");
+
         campaigns[prevId] = Campaign(host, 0, exp);
+        prevId++;
     }
 
     function claim(uint256 id) public {
-        require(campaigns[id].host == msg.sender, "Not your campaign.");
-        require(campaigns[id].expires > block.timestamp, "Campaign is active.");
+        require(campaigns[id].host == msg.sender, "Not your campaign");
+        require(campaigns[id].expires <= block.timestamp, "Campaign is active");
 
         // Will also occur on claiming twice, claiming twice is also 'covered' by the frontend
-        require(campaigns[id].balance > 0, "No money to be claimed.");
+        require(campaigns[id].balance > 0, "No money to be claimed");
         
         // ===================================
         // Checks
         uint256 share = campaigns[id].balance;
-        require(address(this).balance >= share, "Not have enough liquidity.");
+        require(address(this).balance >= share, "Not have enough liquidity");
         // Effects
         campaigns[id].balance = 0;
         // Interactions
         (bool success, ) = payable(msg.sender).call{value: share}("");
-        require(success, "Transfer failed.");
-    }
-
-    function deposit(uint256 id, uint256 amount) payable public {
-        require(msg.value == amount);
-
-        require(campaigns[id].host != msg.sender, "Cannot donate to own campaign.");
-        require(campaigns[id].expires <= block.timestamp, "Campaign has been closed.");
-
-        campaigns[id].balance += amount;
-    }
-
-    function get(uint256 id) public view returns (address, uint256, uint256) {
-        Campaign storage cmp = campaigns[id];
-        return (cmp.host, cmp.expires, cmp.balance);
+        require(success, "Transfer failed");
     }
 }
