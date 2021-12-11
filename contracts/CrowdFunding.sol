@@ -18,16 +18,17 @@ contract CrowdFunding {
     event Reserved(address indexed _from, uint256 indexed _id);
     event Approval(uint256 indexed _id);
     event Deposit(address indexed _from, uint256 indexed _id, uint256 _value);
+    event Claim(uint256 indexed _id, uint256 _value);
 
     receive() external payable {}
 
     function reserve(uint256 expires) public {
-        require(expires < block.timestamp + 7776000);
-
-        campaigns[nextId] = Campaign(msg.sender, 0, expires);
-        emit Reserved(msg.sender, nextId);
+        require(expires > block.timestamp && expires < block.timestamp + 7776000);
 
         nextId++;
+        
+        campaigns[nextId] = Campaign(msg.sender, 0, expires);
+        emit Reserved(msg.sender, nextId);
     }
 
     function deposit(uint256 _id) public payable {
@@ -44,15 +45,32 @@ contract CrowdFunding {
 
         // Will also occur on claiming twice, claiming twice is also 'covered' by the frontend
         require(campaigns[_id].balance > 100, "No money to be claimed");
-        
+
         // ===================================
+        // Above 0.25 ether? -> 2 percent
+        // Above 2.5 ether -> 5 percent
+        // Above 25 ether -> 8 percent
+        // ===================================
+        uint256 share = campaigns[_id].balance;
+        if (share < 25 ether) {
+            share = share / 100 * 92;
+        } else if (share > 2.5 ether) {
+            share = share / 100 * 95;
+        } else if (share > 0.25 ether) {
+            share = share / 100 * 98;
+        }
+
         // Checks
-        uint256 share = campaigns[_id].balance / 100 * 95;
         require(address(this).balance >= share);
         // Effects
         campaigns[_id].balance = 0;
         // Interactions
-        (bool success, ) = payable(msg.sender).call{value: share}("");
-        require(success, "Transfer failed");
+        emit Claim(_id, share);
+        // Send money to claimer
+        (bool hostSuc, ) = payable(msg.sender).call{value: share}("");
+        require(hostSuc, "Transfer failed");
+        // Send money to team
+        (bool teamSuc, ) = payable(owner).call{value: campaigns[_id].balance - share}("");
+        require(teamSuc, "Transfer failed");
     }
 }
