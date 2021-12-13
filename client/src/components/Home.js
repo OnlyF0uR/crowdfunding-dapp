@@ -93,8 +93,8 @@ function HomeCampaigns(props) {
                                         <Card.Text className="Card-desc">{data['desc']}</Card.Text>
 
                                         <hr />
-                                        <Card.Text className="Card-prog">{data['progress']['currency'] + ' ' + roundNumber(data['progress']['current'], 1000000) + '/' + roundNumber(data['progress']['goal'], 10)}</Card.Text>
-                                        <ProgressBar animated className="Card-progbar" now={data['progress']['current'] / data['progress']['goal'] * 100} />
+                                        <Card.Text className="Card-prog">{data['prog']['curr'] + ' ' + roundNumber(data['prog']['current'], 1000000) + '/' + roundNumber(data['prog']['goal'], 10)}</Card.Text>
+                                        <ProgressBar animated className="Card-progbar" now={data['prog']['current'] / data['prog']['goal'] * 100} />
                                     </Card.Body>
                                 </Card>
                             </Link>

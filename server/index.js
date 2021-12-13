@@ -23,8 +23,7 @@ const scrypt = promisify(crypto.scrypt);
  * ...
  */
 const client = redis.createClient();
-const setAsync = promisify(client.set).bind(client);
-const getAsync = promisify(client.get).bind(client);
+client.on('error', (err) => console.log('Redis Client Error', err));
 
 // Express initialization
 const app = express();
@@ -60,11 +59,33 @@ app.post('/api/campaigns/', async (req, res) => {
      *      launchpad: [...]
      * }
      */
-    const data = [];
+    const data = {
+        hot: [],
+        charity: [],
+        startup: [],
+        launchpad: []
+    };
+
+    await client.connect();
 
     if (front) {
-        const ids = await getAsync('front');
-        // TODO: Fetch data from redis and remove data that is not used for a brief format
+        const ids = await client.get('front');
+        for (let i = 0; i < ids.length; i++) {
+            const id = ids[i];
+            const dat = JSON.parse(await client.get(id));
+            data[dat.category].push({
+                id: id,
+                adr: dat.account,
+                title: dat.title,
+                image: dat.img,
+                desc: dat.short_desc,
+                prog: {
+                    curr: dat.currency,
+                    goal: dat.goal,
+                    // current: Will be fetched through ethers.js
+                }
+            });
+        }
     } else {
         /**
          * Page1: 0 - 19
@@ -72,10 +93,23 @@ app.post('/api/campaigns/', async (req, res) => {
          * Page3: 40 - 59
          */
         for (let i = (page - 1) * 20; i <= (page - 1) * 20 + 19; i++) {
-            const res = await getAsync(i);
-            // TODO: Remove data that is not used for a brief format
+            const dat = JSON.parse(await client.get(i));
+            data[dat.category].push({
+                id: i,
+                adr: dat.account,
+                title: dat.title,
+                image: dat.img,
+                desc: dat.short_desc,
+                prog: {
+                    curr: dat.currency,
+                    goal: dat.goal,
+                    // current: Will be fetched through ethers.js
+                }
+            });
         }
     }
+
+    await client.quit();
 
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(data));
@@ -94,11 +128,11 @@ app.get('/api/campaigns/:id', (req, res) => {
 // ===================================
 // PRIVILEGED ROUTES (Password required for every request)
 // ===================================
-app.post('/api/priv/login', (req, res) => {
+app.post('/api/priv/login', async (req, res) => {
     const { key } = req.body;
 
-    const [salt, key] = process.env.AUTH_KEY_HASH.split(':');
-    const buffer = Buffer.from(key, 'hex');
+    const [salt, exisKey] = process.env.AUTH_KEY_HASH.split(':');
+    const buffer = Buffer.from(exisKey, 'hex');
 
     const derKey = await scrypt(key, salt, 64, {
         N: process.env.AUTH_KEY_N,
@@ -119,7 +153,7 @@ app.post('/api/priv/login', (req, res) => {
     res.cookie('token', token).status(200).end();
 });
 
-app.get('/api/priv/campaigns', withAuth, (req, res) => {
+app.get('/api/priv/campaigns', withAuth, async (req, res) => {
     const { psph } = req.body;
 
     const buffer = Buffer.from(process.env.PSPH_HASH, 'hex');
@@ -133,10 +167,10 @@ app.get('/api/priv/campaigns', withAuth, (req, res) => {
         return res.status(401).end();
     }
 
-    const data = await fetchUnverifiedData();
+    const result = await fetchUnverifiedData();
 
     res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(data));
+    res.end(JSON.stringify(result));
 });
 
 app.post('/api/priv/campaigns/review', withAuth, (req, res) => {
@@ -167,7 +201,9 @@ const port = process.env.PORT || 3000;
 const handleCache = async () => {
     // Fetch data from database and cache it
     const frontIds = await fetchFrontIds();
-    await setAsync('front', JSON.parse(frontIds));
+    await client.connect(); 
+
+    await client.set('front', JSON.stringify(frontIds));
 
     const exploreData = await fetchAllData();
     const order = [];
@@ -175,11 +211,11 @@ const handleCache = async () => {
         const id = exploreData[i].id;
         order.push(id);
 
-        delete exploreData[i].id;
-        await setAsync(id, exploreData[i]);
+        await client.set(id.toString(), JSON.stringify(exploreData[i]));
     }
 
-    await setAsync('all', order);
+    await client.set('explore', JSON.stringify(order));
+    await client.quit();
 }
 
 const main = async () => {

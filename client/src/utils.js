@@ -20,8 +20,8 @@ export function getCampaigns(preview = true, page = 1) {
                     title: 'My new project',
                     adr: '0xaACC88D8C3D9bFdd781dEa1381c073E205796970',
                     desc: 'Hi all! I would like to start my new project the only problem I ran into is that i need some funding to kickstart it. That\'s why I created this funding campaign on this amazing platform.',
-                    progress: {
-                        currency: 'ETH',
+                    prog: {
+                        curr: 'ETH',
                         goal: 10,
                         current: 6.7884632121
                     }
@@ -32,8 +32,8 @@ export function getCampaigns(preview = true, page = 1) {
                     title: 'Lorem ipsum',
                     adr: '0xaACC88D8C3D9bFdd781dEa1381c073E205796970',
                     desc: 'dolor sit amet.',
-                    progress: {
-                        currency: 'ETH',
+                    prog: {
+                        curr: 'ETH',
                         goal: 50,
                         current: 6.7884632121
                     }
@@ -46,8 +46,8 @@ export function getCampaigns(preview = true, page = 1) {
                     title: 'Big bruv mate',
                     desc: 'Hi all! I would like to start my new project the only problem I ran into is that i need some funding to kickstart it. That\'s why I created this funding campaign on this amazing platformawddddddddddddddddddddddddddddd.',
                     adr: '0xaACC88D8C3D9bFdd781dEa1381c073E205796970',
-                    progress: {
-                        currency: 'ETH',
+                    prog: {
+                        curr: 'ETH',
                         goal: 1000,
                         current: 6.7884632121
                     }

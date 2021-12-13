@@ -19,84 +19,57 @@ const fetchFrontIds = async () => {
       SELECT
          id 
       FROM
-         campaigns c1 
+         campaigns
       WHERE
-         id = 
-         (
-            SELECT
-               MAX(c2.id) 
-            FROM
-               campaigns c2 
-            WHERE
-               c1.id = c2.id 
-         )
-         AND category = 'hot'
+         category = 'hot'
          AND verified IS TRUE
-         LIMIT 8
-      ) 
+         AND expires - CAST(EXTRACT(epoch FROM NOW()) AS INT) > 0
+      ORDER BY id DESC LIMIT 8
+      )
       UNION ALL
       (
       SELECT
          id 
       FROM
-         campaigns c1 
+         campaigns
       WHERE
-         id = 
-         (
-            SELECT
-               MAX(c2.id) 
-            FROM
-               campaigns c2 
-            WHERE
-               c1.id = c2.id 
-         )
-         AND category = 'charity'
+         category = 'charity'
          AND verified IS TRUE
-         LIMIT 8
-      ) 
+         AND expires - CAST(EXTRACT(epoch FROM NOW()) AS INT) > 0
+      ORDER BY id DESC LIMIT 8
+      )
       UNION ALL
       (
       SELECT
          id 
       FROM
-         campaigns c1 
+         campaigns
       WHERE
-         id = 
-         (
-            SELECT
-               MAX(c2.id) 
-            FROM
-               campaigns c2 
-            WHERE
-               c1.id = c2.id 
-         )
-         AND category = 'startup'
+         category = 'startup'
          AND verified IS TRUE
-         LIMIT 8
-      ) 
+         AND expires - CAST(EXTRACT(epoch FROM NOW()) AS INT) > 0
+      ORDER BY id DESC LIMIT 8
+      )
       UNION ALL
       (
       SELECT
          id 
       FROM
-         campaigns c1 
+         campaigns
       WHERE
-         id = 
-         (
-            SELECT
-               MAX(c2.id) 
-            FROM
-               campaigns c2 
-            WHERE
-               c1.id = c2.id  
-         )
-         AND category = 'launchpad'
+         category = 'launchpad'
          AND verified IS TRUE
-         LIMIT 8
+         AND expires - CAST(EXTRACT(epoch FROM NOW()) AS INT) > 0
+      ORDER BY id DESC LIMIT 8
       )
    `);
 
-   return rows;
+   const res = [];
+   for (let i = 0; i < rows.length; i++) {
+      res.push(rows[i].id);
+   }
+
+   return res;
 };
 
 const fetchAllData = async () => {
