@@ -13,7 +13,7 @@ const pool = new Pool({
 
 const query = (query, params) => !params ? pool.query(query) : pool.query(query, params);
 
-const fetchBriefIds = async () => {
+const fetchFrontIds = async () => {
    const { rows } = await query(`
       (
       SELECT
@@ -104,11 +104,13 @@ const fetchAllData = async () => {
       SELECT
          id,
          account,
+         currency,
          title,
          short_desc,
+         long_desc,
          goal,
          img,
-         expires
+         category
       FROM
          campaigns
       WHERE
@@ -127,7 +129,7 @@ const fetchUnverifiedData = async () => {
 }
 
 module.exports = {
-   fetchBriefIds,
+   fetchFrontIds,
    fetchAllData,
 
    fetchUnverifiedData

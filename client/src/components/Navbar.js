@@ -27,6 +27,7 @@ function NavigationBar({ provider }) {
                         <Nav className="me-auto">
                             <Link to="/explore" className="nav-link">Explore</Link>
                             <Link to="/news" className="nav-link">News</Link>
+                            <Link to="/learn" className='nav-link'>Learn</Link>
                             <NavDropdown title="Manage" id="collasible-nav-dropdown">
                                 <Link to="/fund/create" className="dropdown-item">Create</Link>
                                 <Link to="/fund/list" className="dropdown-item">List</Link>
@@ -40,8 +41,8 @@ function NavigationBar({ provider }) {
                                     async () => {
                                         if (provider !== null) {
                                             await provider.send("eth_requestAccounts", []);
-
-                                            const signer = provider.signer();
+                                            
+                                            const signer = provider.getSigner();
                                             const account = await signer.getAddress();
 
                                             setAccount(account);

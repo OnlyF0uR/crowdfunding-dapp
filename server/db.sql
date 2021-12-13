@@ -2,6 +2,7 @@
 CREATE TABLE IF NOT EXISTS campaigns(
     id SERIAL PRIMARY KEY,
     account VARCHAR NOT NULL,
+    currency VARCHAR NOT NULL,
     title VARCHAR NOT NULL,
     short_desc TEXT NOT NULL,
     long_desc TEXT NOT NULL,
@@ -15,7 +16,7 @@ CREATE TABLE IF NOT EXISTS campaigns(
 -- Select brief by newest first
 (
 SELECT
-   id, account, title, short_desc, goal, img, expires 
+   id 
 FROM
    campaigns c1 
 WHERE
@@ -35,7 +36,7 @@ WHERE
 UNION ALL
 (
 SELECT
-   id, account, title, short_desc, goal, img, expires 
+   id 
 FROM
    campaigns c1 
 WHERE
@@ -55,7 +56,7 @@ WHERE
 UNION ALL
 (
 SELECT
-   id, account, title, short_desc, goal, img, expires 
+   id
 FROM
    campaigns c1 
 WHERE
@@ -75,7 +76,7 @@ WHERE
 UNION ALL
 (
 SELECT
-   id, account, title, short_desc, goal, img, expires 
+   id
 FROM
    campaigns c1 
 WHERE
@@ -97,10 +98,13 @@ WHERE
 SELECT
     id,
     account,
+    currency,
     title,
     short_desc,
+    long_desc,
     goal,
     img,
+    category,
     expires
 FROM
     campaigns

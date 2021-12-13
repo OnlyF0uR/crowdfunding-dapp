@@ -14,6 +14,7 @@ import { FundCreate, FundList, FundDocs } from './components/Fund';
 import CampaignPage from './components/campaigns/CampaignPage';
 import Navbar from './components/Navbar';
 import Error from './components/Error';
+import Learn from './components/Learn';
 
 function App() {
     const [web3, setWeb3] = useState({ provider: null, contract: null });
@@ -54,6 +55,7 @@ function App() {
                 <Route path="/explore" element={<Explore />} />
                 <Route path="/campaign/:campaignId" element={<CampaignPage />} />
                 <Route path="/news" element={<News />} />
+                <Route path="/learn" element={<Learn />} />
                 <Route path="/fund/create" element={<FundCreate />} />
                 <Route path="/fund/list" element={<FundList />} />
                 <Route path="/fund/docs" element={<FundDocs />} />

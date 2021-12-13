@@ -1,27 +1,33 @@
 require('dotenv').config();
 
-const crypto = require('crypto');
-const { promisify } = require('util');
+// Express
 const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const { withAuth } = require('./middleware');
+// Promise
+const { promisify } = require('util');
+// Data
+const crypto = require('crypto');
 const redis = require('redis');
-const { fetchBriefIds, fetchAllData, fetchUnverifiedData } = require('./db');
+const { fetchFrontIds, fetchAllData, fetchUnverifiedData } = require('./db');
 
-const app = express();
+// Scrypt
 const scrypt = promisify(crypto.scrypt);
+
 /**
- * brief: int[] --> Contains the selection and order
+ * front: int[] --> Contains the selection and order
  * explore: int[] --> Contains the entire order
- * 0: {}
+ * 0: {},
+ * ...
  */
 const client = redis.createClient();
-
 const setAsync = promisify(client.set).bind(client);
 const getAsync = promisify(client.get).bind(client);
 
+// Express initialization
+const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.disable('x-powered-by');
@@ -35,13 +41,30 @@ app.use(cors({
 // ===================================
 // DEFAULT ROUTES
 // ===================================
+/**
+ *  id SERIAL PRIMARY KEY,
+ *  account VARCHAR NOT NULL,
+ *  title VARCHAR NOT NULL,
+ *  short_desc TEXT NOT NULL,
+ *  goal decimal NOT NULL,
+ *  img TEXT NOT NULL
+ */
 app.post('/api/campaigns/', async (req, res) => {
-    const { brief, page } = req.body;
+    const { front, page } = req.body;
 
-    let data;
+    /**
+     * {
+     *      hot: [{ id, account, title, short_desc, goal, img, progress: {currency, goal} },],
+     *      charity: [...],
+     *      startup: [...],
+     *      launchpad: [...]
+     * }
+     */
+    const data = [];
 
-    if (brief) {
-        // TODO: Fetch from redis
+    if (front) {
+        const ids = await getAsync('front');
+        // TODO: Fetch data from redis and remove data that is not used for a brief format
     } else {
         /**
          * Page1: 0 - 19
@@ -49,7 +72,8 @@ app.post('/api/campaigns/', async (req, res) => {
          * Page3: 40 - 59
          */
         for (let i = (page - 1) * 20; i <= (page - 1) * 20 + 19; i++) {
-            console.log(i)
+            const res = await getAsync(i);
+            // TODO: Remove data that is not used for a brief format
         }
     }
 
@@ -60,7 +84,7 @@ app.post('/api/campaigns/', async (req, res) => {
 app.get('/api/campaigns/:id', (req, res) => {
     const { id } = req.params;
 
-    // TODO: Fetch a single campaign from the database
+    // TODO: Fetch a single campaign from redis
     const data = null;
 
     res.setHeader('Content-Type', 'application/json');
@@ -142,15 +166,15 @@ const port = process.env.PORT || 3000;
 
 const handleCache = async () => {
     // Fetch data from database and cache it
-    const briefIds = await fetchBriefIds();
-    await setAsync('brief', JSON.parse(briefIds));
+    const frontIds = await fetchFrontIds();
+    await setAsync('front', JSON.parse(frontIds));
 
-    const exploreData = await fetchAllData(); 
+    const exploreData = await fetchAllData();
     const order = [];
     for (let i = 0; i < exploreData.length; i++) {
         const id = exploreData[i].id;
         order.push(id);
-        
+
         delete exploreData[i].id;
         await setAsync(id, exploreData[i]);
     }
@@ -162,7 +186,7 @@ const main = async () => {
     console.log('Started caching...')
     await handleCache();
     console.log('Cached data...')
-    setInterval(async() => handleCache, 1000 * 60 * 60);
+    setInterval(async () => handleCache, 1000 * 60 * 60); // Every hour
     console.log('Initiated interval...')
 
     // Listen on the appropiate port

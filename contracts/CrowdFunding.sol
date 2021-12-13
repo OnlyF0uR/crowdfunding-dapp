@@ -24,11 +24,11 @@ contract CrowdFunding {
 
     function reserve(uint256 expires) public {
         require(expires > block.timestamp && expires < block.timestamp + 7776000);
-
-        nextId++;
         
         campaigns[nextId] = Campaign(msg.sender, 0, expires);
         emit Reserved(msg.sender, nextId);
+
+        nextId++;
     }
 
     function deposit(uint256 _id) public payable {
