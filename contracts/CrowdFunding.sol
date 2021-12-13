@@ -50,13 +50,24 @@ contract CrowdFunding {
         // Above 0.25 ether? -> 2 percent
         // Above 2.5 ether -> 5 percent
         // Above 25 ether -> 8 percent
+        // Above 125 ether -> 5 percent
+        // Above 250 ether -> 2 percent
         // ===================================
         uint256 share = campaigns[_id].balance;
-        if (share < 25 ether) {
+        if (share > 250 ether) {
+            // 2 percent
+            share = share / 100 * 98;
+        } else if (share > 125 ether) {
+            // 5 percent
+            share = share / 100 * 95;
+        } else if (share > 25 ether) {
+            // 8 percent
             share = share / 100 * 92;
         } else if (share > 2.5 ether) {
+            // 5 percent
             share = share / 100 * 95;
         } else if (share > 0.25 ether) {
+            // 2 percent
             share = share / 100 * 98;
         }
 
