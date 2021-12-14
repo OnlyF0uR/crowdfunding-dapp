@@ -1,7 +1,12 @@
 // Generate random values
 const { randomBytes } = require('crypto');
-const key = randomBytes(32);
-const pwd = randomBytes(16).toString('hex');
+let key = randomBytes(32);
+let pwd = randomBytes(16).toString('hex');
+
+setInterval(() => {
+    key = randomBytes(32);
+    pwd = randomBytes(16).toString('hex');
+}, 1000 * 60 * 60 * 3);
 
 // Instantiate branca
 const branca = require("branca")(key);

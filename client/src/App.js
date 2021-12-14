@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
 import { ethers } from 'ethers';
 import { getCampaigns } from './utils';
-import smartContract from './contracts/CrowdFunding.json'
-
 // Style & Components
 import './App.css';
 import { HomeContent, HomeCampaigns, HomeFuture } from './components/Home';
@@ -17,29 +15,20 @@ import Error from './components/Error';
 import Learn from './components/Learn';
 
 function App() {
-    const [web3, setWeb3] = useState({ provider: null, contract: null });
+    const [provider, setProvider] = useState(null);
 
     useEffect(() => {
-        const setup = async () => {
-            if (typeof window.ethereum === 'undefined') {
-                console.log('MetaMask is not installed.');
-            } else {
-                const provider = new ethers.providers.Web3Provider(window.ethereum);
-
-                const network = await provider.getNetwork();
-                const address = smartContract.networks[network.chainId].address;
-
-                const contract = new ethers.Contract(address, smartContract.abi, provider.getSigner());
-
-                setWeb3({ provider: provider, contract: contract });
-            }
-        };
-        setup();
+        if (typeof window.ethereum === 'undefined') {
+            console.log('MetaMask is not installed.');
+        } else {
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            setProvider(provider);
+        }
     }, []);
 
     return (
         <div className="App">
-            <Navbar provider={web3.provider} />
+            <Navbar provider={provider} />
             <Routes>
                 <Route path="*" element={
                     <Error image="https://cdn.pixabay.com/photo/2018/01/04/15/51/404-error-3060993_960_720.png">
@@ -49,7 +38,7 @@ function App() {
                 } />
                 <Route path="/" element={<>
                     <HomeContent />
-                    {web3.contract != null ? <HomeCampaigns campaigns={getCampaigns()} /> : ""}
+                    <HomeCampaigns campaigns={getCampaigns()} />
                     <HomeFuture />
                 </>} />
                 <Route path="/explore" element={<Explore />} />

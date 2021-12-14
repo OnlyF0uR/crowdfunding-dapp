@@ -117,6 +117,13 @@ function FundCreate() {
     );
 };
 
+/**
+ * TODO:
+ *  - Check localStorage for injected
+ *  - Get the current account (eth_requestAccounts Promise)
+ *  - Indexed base on that account
+ */
+
 function FundList() {
     return (
         <div style={{ marginTop: '75px' }}>
