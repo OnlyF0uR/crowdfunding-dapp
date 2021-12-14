@@ -5,7 +5,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
-const { withAuth } = require('./middleware');
+const { withAuth, getAuth } = require('./middleware');
 // Promise
 const { promisify } = require('util');
 // Data
@@ -196,11 +196,7 @@ app.post('/api/priv/login', async (req, res) => {
         return res.status(401).end();
     }
 
-    const token = jwt.sign(process.env.JWT_PWD, process.env.JWT_KEY, {
-        expiresIn: '1h'
-    });
-
-    res.cookie('token', token).status(200).end();
+    res.cookie('token', getAuth()).status(200).end();
 });
 
 app.get('/api/priv/campaigns', withAuth, async (req, res) => {
