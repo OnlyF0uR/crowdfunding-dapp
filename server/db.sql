@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS campaigns(
     verified BOOLEAN NOT NULL
 );
 
+-- Some example/testing inserts
 INSERT INTO campaigns(id, account, currency, title, short_desc, long_desc, goal, img, category, expires, verified) VALUES (0, '0x27bF96EbB3bB2C0cD6F9bE9f063A3fDe408770b0', 'ETH', 'My new project', 'Hi all! I would like to start my new project the only problem I ran into is that i need some funding to kickstart it. That is why I created this funding campaign on this amazing platform.', 'THIS DESCRIPTION IS SO FREAKING LONG MATE THIS IS BLOODY INSANE I TELL YOU', 12.5, 'no img here', 'hot', 1739419113, true);
 
 INSERT INTO campaigns(id, account, currency, title, short_desc, long_desc, goal, img, category, expires, verified) VALUES (2, '0x27bF96EbB3bB2C0cD6F9bE9f063A3fDe408770b0', 'ETH', 'My new project', 'Hi all! I would like to start my new project the only problem I ran into is that i need some funding to kickstart it. That is why I created this funding campaign on this amazing platform.', 'THIS DESCRIPTION IS SO FREAKING LONG MATE THIS IS BLOODY INSANE I TELL YOU', 15.5, 'no img here', 'hot', 1639419143, true);

@@ -75,19 +75,10 @@ const fetchFrontIds = async () => {
 const fetchAllData = async () => {
    const { rows } = await query(`
       SELECT
-         id,
-         account,
-         currency,
-         title,
-         short_desc,
-         long_desc,
-         goal,
-         img,
-         category
+         *
       FROM
          campaigns
       WHERE
-         verified IS TRUE AND
          expires - CAST(EXTRACT(epoch FROM NOW()) AS INT) > 0
       ORDER BY
          expires - CAST(EXTRACT(epoch FROM NOW()) AS INT) ASC

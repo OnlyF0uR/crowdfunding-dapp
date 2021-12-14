@@ -8,8 +8,9 @@ contract CrowdFunding {
        address host;
        uint256 balance;
        uint256 expires;
+       bytes32 authHash;
     }
-    mapping(uint256 => Campaign) public campaigns;
+    mapping(uint256 => Campaign) public campaigns; // Comes with build in getter function
 
     constructor() {
         owner = msg.sender;
@@ -22,10 +23,12 @@ contract CrowdFunding {
 
     receive() external payable {}
 
-    function reserve(uint256 expires) public {
+    function reserve(uint256 expires, string calldata authSecret) public {
         require(expires > block.timestamp && expires < block.timestamp + 7776000);
+
+        bytes32 authHash = keccak256(abi.encode(authSecret));
         
-        campaigns[nextId] = Campaign(msg.sender, 0, expires);
+        campaigns[nextId] = Campaign(msg.sender, 0, expires, authHash);
         emit Reserved(msg.sender, nextId);
 
         nextId++;

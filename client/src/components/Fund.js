@@ -55,6 +55,14 @@ function FundCreate() {
         }
 
         setValidated(true);
+
+        /**
+         * TODO:
+         *  - Generate a random secret
+         *  - Sign the transaction with the blockchain
+         *  - Collect data
+         *  - Send data to the backend along with the random secret
+         */
     };
 
     return (
