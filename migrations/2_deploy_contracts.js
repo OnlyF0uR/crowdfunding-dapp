@@ -1,5 +1,5 @@
-var CrowndFunding = artifacts.require('./CrowdFunding.sol');
+var Funding = artifacts.require('./Funding.sol');
 
 module.exports = function (deployer) {
-    deployer.deploy(CrowndFunding);
+    deployer.deploy(Funding);
 };
