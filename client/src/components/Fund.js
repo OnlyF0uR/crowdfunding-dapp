@@ -124,7 +124,7 @@ function FundCreate() {
  *  - Indexed base on that account
  */
 
-function FundList() {
+function FundList({ provider }) {
     return (
         <div style={{ marginTop: '75px' }}>
             <p>Fund list</p>
