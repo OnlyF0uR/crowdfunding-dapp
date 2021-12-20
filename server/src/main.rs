@@ -1,18 +1,22 @@
 use actix_web::{web, App, HttpServer};
-use std::convert::TryFrom;
+use std::env;
 
-use deadpool_postgres::{Config, ManagerConfig, Pool, RecyclingMethod, Runtime};
+use deadpool_postgres::{Config, ManagerConfig, RecyclingMethod, Runtime};
 use redis::Client;
-use ethers::providers::{Provider, Http as EthHttp};
+use web3::contract::Contract;
+use web3::types::Address;
 
 #[path = "routes/campaigns.rs"] mod campaigns;
 #[path = "routes/privileged.rs"] mod privileged;
 
-#[tokio::main]
-async fn main() -> std::io::Result<()> {
+#[actix_web::main]
+async fn main() -> std::io::Result<()>  {
+    dotenv::dotenv().ok();
+
     // Postgres
     let mut cfg = Config::new();
     cfg.host = Some("localhost".to_string());
+    cfg.port = Some(5433);
     cfg.dbname = Some("funding".to_string());
     cfg.user = Some("postgres".to_string());
     cfg.password = Some("x".to_string());
@@ -25,18 +29,18 @@ async fn main() -> std::io::Result<()> {
     let con = client.get_async_connection().await;
 
     if con.is_err() {
-        println!("An error occurred while connecting to redis.");
+        println!("An error occurred while connecting to Redis.");
         std::process::exit(1);
     }
 
-    // Ethereum Provider
-    let provider: Provider<EthHttp> = Provider::<EthHttp>::try_from("x").expect("could not instantiate HTTP Provider.");
+    let transport = web3::transports::Http::new(&env::var("RPC_LISTENER").unwrap()).expect("Could not establish RPC connection.");
+    let web3 = web3::Web3::new(transport);
 
     // Application scope definition
     HttpServer::new(move || App::new()
         .app_data(web::Data::new(pool.clone()))
         .app_data(web::Data::new(client.clone()))
-        .app_data(web::Data::new(provider.clone()))
+        .app_data(web::Data::new(web3.clone()))
 
         // .app_data(web::Data::new(web::Data::clone(&data)))
         .service(web::scope("/campaigns")

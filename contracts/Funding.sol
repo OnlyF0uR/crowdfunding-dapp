@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.10;
+pragma solidity ^0.8.11;
 
 // Interface for ERC20 DAI contract
 interface DAI {
@@ -32,7 +32,6 @@ contract Funding {
        address host;
        uint256 balance;
        uint256 expires;
-       bytes32 authHash;
     }
 
     string public name = "Funding";
@@ -52,12 +51,10 @@ contract Funding {
     event Deposit(address indexed _from, uint256 indexed _id, uint256 _value);
     event Claim(uint256 indexed _id, uint256 _value);
 
-    function reserve(uint256 expires, string calldata authSecret) public {
+    function reserve(uint256 expires) public {
         require(expires > block.timestamp && expires < block.timestamp + 7776000);
-
-        bytes32 authHash = keccak256(abi.encode(authSecret));
         
-        campaigns[nextId] = Campaign(msg.sender, 0, expires, authHash);
+        campaigns[nextId] = Campaign(msg.sender, 0, expires);
         emit Reserved(msg.sender, nextId);
 
         nextId++;
